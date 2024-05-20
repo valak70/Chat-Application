@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import "./chatList.css"
+import AddUser from './addUser/AddUser';
 
 const ChatList = () => {
     const [symbol,setSymbol] = useState(false);
@@ -36,6 +37,7 @@ const ChatList = () => {
                 <p>Hello</p>
             </div>
         </div>
+        {symbol && <AddUser/>}
     </div>
   )
 }
