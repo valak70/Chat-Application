@@ -7,6 +7,9 @@ import { db } from '../../../../lib/firebase'
 
 const AddUser = () => {
   const [user,setUser] = useState(null)
+  const handleAdd = async ()=>{
+    
+  }
   const handleSearch = async (e)=>{
     e.preventDefault()
     const formData = new FormData(e.target)
@@ -32,7 +35,7 @@ const AddUser = () => {
           <img src={user.avatar || "./avatar.png"} alt="" />
           <span>{user.username}</span>
         </div>
-        <button onClick={handleClick}>Add User</button>
+        <button onClick={handleAdd}>Add User</button>
       </div>}
     </div>
   )
