@@ -1,8 +1,13 @@
 import React from 'react'
 import "./detail.css"
 import { auth } from '../../lib/firebase'
+import { useChatStore } from '../../lib/chatStore'
 
 const Detail = () => {
+  const {changeBlock} = useChatStore();
+  const handleClick = ()=>{
+    changeBlock()
+  }
   return (
     <div className='detail'>
       <div className="user">
@@ -58,7 +63,7 @@ const Detail = () => {
             <img src="./arrowUp.png" alt="" />
           </div>
         </div>
-        <button>Block User</button>
+        <button onClick={handleClick}>Block User</button>
         <button className="logout" onClick={()=> auth.signOut()}>Logout</button>
       </div>
     </div>

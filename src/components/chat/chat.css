@@ -53,14 +53,18 @@
         }
       }
     }
-  
+    .center::-webkit-scrollbar {
+      display: none;
+    }
     .center {
       padding: 20px;
       flex: 1;
-      overflow: scroll;
+      overflow: auto;
       display: flex;
       flex-direction: column;
       gap: 20px;
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
   
       .message {
         max-width: 70%;
@@ -169,3 +173,4 @@
       }
     }
   }
+

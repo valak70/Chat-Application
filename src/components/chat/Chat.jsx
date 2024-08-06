@@ -1,19 +1,77 @@
 import React, { useEffect, useRef, useState } from 'react'
 import "./chat.css"
 import EmojiPicker from 'emoji-picker-react'
+import { arrayUnion, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
+import { useChatStore } from '../../lib/chatStore';
+import { toast } from 'react-toastify';
+import { useUserStore } from '../../lib/userStore';
+import { format } from "timeago.js";
 
 const Chat = () => {
+  const [chat, setChat] = useState();
   const [emoji,setEmoji] = useState(false);
   const [text,setText] = useState("");
+  const {chatId,user} = useChatStore();
+  const {currentUser} = useUserStore();
   const endRef = useRef(null);
   useEffect( () => {
     endRef.current?.scrollIntoView({behaviour : "smooth"})
   },[])
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db,"chats",chatId), async (res)=>{
+      setChat(res.data())
+    })
+  
+    return () => {
+      unsub();
+    }
+  }, [chatId])
+  console.log(chat);
   const handleClick = () => {
     setEmoji(!emoji)
   }
   const handleEmoji = (e) =>{
     setText((prev) => prev + e.emoji)
+  }
+  const handleSend = async ()=>{
+    if(text === "") return;
+    try {
+      await updateDoc(doc(db,"chats",chatId),{
+        messages:arrayUnion({
+          senderId : currentUser.id,
+          text,
+          createdAt : new Date(),
+        })   
+      })
+      const userIDs = [currentUser.id, user.id];
+
+      userIDs.forEach(async (id) => {
+        const userChatsRef = doc(db, "userChats", id);
+        const userChatsSnapshot = await getDoc(userChatsRef);
+
+        if (userChatsSnapshot.exists()) {
+          const userChatsData = userChatsSnapshot.data();
+
+          const chatIndex = userChatsData.chats.findIndex(
+            (c) => c.chatId === chatId
+          );
+
+          userChatsData.chats[chatIndex].lastMessage = text;
+          console.log(text);
+          userChatsData.chats[chatIndex].isSeen =
+            id === currentUser.id ? true : false;
+          userChatsData.chats[chatIndex].updatedAt = Date.now();
+
+          await updateDoc(userChatsRef, {
+            chats: userChatsData.chats,
+          });
+        }
+      });
+    } catch (err) {
+      toast.error(err.message)
+    }
+
   }
   return (
     <div className='chat'>
@@ -32,35 +90,17 @@ const Chat = () => {
         </div>
       </div>
       <div className="center">
-        <div className="message">
-          <img src="./avatar.png" alt="" />
+        {chat?.messages?.map((message)=>(
+          <div className={
+            message.senderId === currentUser?.id ? "message own" : "message"
+          }
+          key={message?.createdAt}>
           <div className="texts">
-            <p>abcdjfsklfhnsdklfghlerhtgfn fasfgusafgeyu gy efushauefhgis</p>
-            <span>5 min ago</span>
+            {message.img && <img src={message.img} alt=''/>}
+            <p>{message.text}</p>
+            <span>{format(message.createdAt.toDate())}</span>
           </div>
-        </div>
-        <div className="message own">
-          {/* <img src="./avatar.png" alt="" /> */}
-          <div className="texts">
-            <p>abcdjfsklfhnsdklfghlerhtgfn fasfgusafgeyu gy efushauefhgis</p>
-            <span>5 min ago</span>
-          </div>
-        </div>
-        <div className="message">
-          <img src="./avatar.png" alt="" />
-          <div className="texts">
-            <p>abcdjfsklfhnsdklfghlerhtgfn fasfgusafgeyu gy efushauefhgis</p>
-            <span>5 min ago</span>
-          </div>
-        </div>
-        <div className="message own">
-          {/* <img src="./avatar.png" alt="" /> */}
-          <div className="texts">
-            <img src="https://github.com/ealush/emoji-picker-react/assets/11255103/c28cc954-dc1d-4d82-91a8-64a74cf1d598" alt="" />
-            <p>abcdjfsklfhnsdklfghlerhtgfn fasfgusafgeyu gy efushauefhgis</p>
-            <span>5 min ago</span>
-          </div>
-        </div>
+        </div>))}
         <div ref={endRef}></div>
       </div>
       <div className="bottom">
@@ -76,7 +116,7 @@ const Chat = () => {
           { emoji && <EmojiPicker onEmojiClick={handleEmoji}/>}
           </div>
         </div>
-        <button className='sendButton'>Send</button>
+        <button className='sendButton' onClick={handleSend}>Send</button>
       </div>
     </div>
   )

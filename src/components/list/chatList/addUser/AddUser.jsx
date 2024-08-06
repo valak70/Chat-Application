@@ -1,15 +1,46 @@
 import React, { useState } from 'react'
 import "./addUser.css"
 import { toast } from 'react-toastify'
-import { collection, getDocs, query, where } from 'firebase/firestore'
+import { collection, doc, getDocs, query, serverTimestamp, where, setDoc, arrayUnion, updateDoc } from 'firebase/firestore'
 import { db } from '../../../../lib/firebase'
+import { set } from 'firebase/database'
+import { useUserStore } from '../../../../lib/userStore'
 
 
 const AddUser = () => {
   const [user,setUser] = useState(null)
-  const handleAdd = async ()=>{
-    
-  }
+  const {currentUser} = useUserStore();
+  const handleAdd = async () => {
+    const chatRef = collection(db, "chats");
+    const userChatsRef = collection(db, "userChats");
+
+    try {
+        const newChatRef = doc(chatRef);  // Create a new document reference
+        await setDoc(newChatRef, {  // Use setDoc instead of set
+            createdAt: serverTimestamp(),
+            messages: [],
+        });
+        await updateDoc(doc(userChatsRef,user.id),{
+          chats : arrayUnion({
+            chatId : newChatRef.id,
+            lastMessage : "",
+            receiverId : currentUser.id,
+            updatedAt : Date.now()
+          })
+        })
+        await updateDoc(doc(userChatsRef,currentUser.id),{
+          chats : arrayUnion({
+            chatId : newChatRef.id,
+            lastMessage : "",
+            receiverId : user.id,
+            updatedAt : Date.now()
+          })
+        })
+    } catch (err) {
+        console.error('Error adding document:', err);
+        toast.error('Error adding document: ' + err.message);
+    }
+};
   const handleSearch = async (e)=>{
     e.preventDefault()
     const formData = new FormData(e.target)

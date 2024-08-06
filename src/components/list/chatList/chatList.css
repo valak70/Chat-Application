@@ -1,6 +1,11 @@
+.chatList::-webkit-scrollbar {
+  display: none;
+}
 .chatList {
     flex: 1;
-    overflow: scroll;
+    overflow: auto;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
     .search {
       display: flex;
       align-items: center;
@@ -71,3 +76,4 @@
       }
     }
   }
+
