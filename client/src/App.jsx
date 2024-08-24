@@ -8,6 +8,9 @@ import { useEffect } from "react"
 import { auth } from "./lib/firebase"
 import { useUserStore } from "./lib/userStore"
 import { useChatStore } from "./lib/chatStore"
+import {BrowserRouter,Route,Routes} from "react-router-dom"
+import Register from "./pages/Register/Register"
+import Home from "./pages/Home/Home"
 
 const App = () => {
   // const user = false
@@ -26,20 +29,27 @@ const App = () => {
   if(isLoading) return <div className="loading">Loading....</div>
 
   return (
-    <div className='container'>
-      {
-        currentUser ? (
-          <>
-          <List/>
-          {chatId && <Chat/>}
-          {chatId && <Detail/>}
-          </>
-        ) : (
-          <Login/>
-        )
-      }
-      <Notification/>
-    </div>
+    // <div className='container'>
+    //   {
+    //     currentUser ? (
+    //       <>
+    //       <List/>
+    //       {chatId && <Chat/>}
+    //       {chatId && <Detail/>}
+    //       </>
+    //     ) : (
+    //       <Login/>
+    //     )
+    //   }
+    //   <Notification/>
+    // </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/register" element ={<Register/>}></Route>
+        <Route path="/login" element ={<Login/>}></Route>
+        <Route path="/" element ={<Home/>}></Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
 
