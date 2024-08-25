@@ -2,7 +2,7 @@ import { onAuthStateChanged } from "firebase/auth"
 import Chat from "./components/chat/Chat"
 import Detail from "./components/detail/Detail"
 import List from "./components/list/List"
-import Login from "./components/login/Login"
+// import Login from "./components/login/Login"
 import Notification from "./components/notification/Notification"
 import { useEffect } from "react"
 import { auth } from "./lib/firebase"
@@ -11,6 +11,7 @@ import { useChatStore } from "./lib/chatStore"
 import {BrowserRouter,Route,Routes} from "react-router-dom"
 import Register from "./pages/Register/Register"
 import Home from "./pages/Home/Home"
+import Login from "./pages/Login/Login"
 
 const App = () => {
   // const user = false
